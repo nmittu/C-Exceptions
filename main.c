@@ -1,10 +1,16 @@
 #include <stddef.h>
 #include <stdio.h>
-#include <setjmp.h>
+#include <stdlib.h>
 #include "exceptions.h"
 
 void bad_func() {
 	throw(1, "bad_func: Exception Thrown!!");
+}
+
+void bad_func_with_code(int code) {
+	char* msg = malloc(sizeof(char) * 100);
+	sprintf(msg, "bad_func: Exception Thrown!! code = %d", code);
+	throw_and_free(code, msg);
 }
 
 int main() {
@@ -20,12 +26,12 @@ int main() {
 					printf("%s\n", "No exception here");
 					end_try();
 				}else{
-					throw(e3->code, e3->message);
+					throw_existing(e3);
 				}
 				bad_func();
 				end_try();
 			}else{
-				throw(e2->code, e2->message);
+				throw_existing(e2);
 			}
 			end_try();
 		}else {
@@ -33,6 +39,19 @@ int main() {
 			destroy_exception(e);
 		}
 	}
+
+	{
+		exception* e;
+		if ((e = try(setjmp(jmp))) == NULL){
+			bad_func_with_code(10);
+			end_try();
+		}else{
+			printf("%s: code: %d\n", e->message, e->code);
+			destroy_exception(e);
+		}
+	}
+
+	throw(100, "Uncaught Exception With Custom Code");
 
 	deinit_exception_handling();
 }
