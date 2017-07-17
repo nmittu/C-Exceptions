@@ -17,6 +17,7 @@ jmp_buf jmp;
 typedef struct{
   int code;
   char* message;
+  void* data;
 } exception;
 
 void init_exception_handling();
@@ -28,6 +29,10 @@ void throw(int code, char* message);
 void throw_existing(exception* ex);
 
 void throw_and_free(int code, char* message);
+
+void throw_with_data(int code, char* message, void* data);
+
+void throw_with_data_and_free(int code, char* message, void* data);
 
 void catch();
 

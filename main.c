@@ -3,6 +3,14 @@
 #include <stdlib.h>
 #include "exceptions.h"
 
+#define CUSTOM_EXCEPTION 15
+
+struct custom_exception{
+	int secondary_code;
+	int line_num;
+	char* file_name;
+};
+
 void bad_func() {
 	throw(1, "bad_func: Exception Thrown!!");
 }
@@ -51,7 +59,28 @@ int main() {
 		}
 	}
 
+	{
+		exception* e;
+		if ((e = try(setjmp(jmp))) == NULL){
+			struct custom_exception* exc = malloc(sizeof(struct custom_exception));
+			exc->secondary_code = 1;
+			exc->line_num = 69;
+			exc->file_name = "main.c";
+			throw_with_data(CUSTOM_EXCEPTION, "Reason for exception", exc);
+			end_try();
+		}else{
+			if (e->code == CUSTOM_EXCEPTION){
+				struct custom_exception* exc = (struct custom_exception*) e->data;
+				printf("[%s:%d] Code: %d Secondary Code: %d Message: %s\n", exc->file_name, exc->line_num, e->code, exc->secondary_code, e->message);
+				free(exc);
+			}
+			destroy_exception(e);
+		}
+	}
+
 	throw(100, "Uncaught Exception With Custom Code");
+
+	printf("This won't print.\n");
 
 	deinit_exception_handling();
 }

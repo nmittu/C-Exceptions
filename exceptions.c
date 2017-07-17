@@ -49,6 +49,7 @@ void throw(int code, char* message){
 	}
 	e.code = code;
 	e.message = malloc(strlen(message) + 1);
+	e.data = NULL;
 	memcpy(e.message, message, strlen(message) + 1);
 	longjmp(jumps[--depth], code);
 }
@@ -65,6 +66,7 @@ void throw_existing(exception* ex){
 	}
 	e.code = ex->code;
 	e.message = ex->message;
+	e.data = ex->data;
 	free(ex);
 	longjmp(jumps[--depth], e.code);
 }
@@ -81,6 +83,42 @@ void throw_and_free(int code, char* message){
 	}
 	e.code = code;
 	e.message = malloc(strlen(message) + 1);
+	e.data = NULL;
+	memcpy(e.message, message, strlen(message) + 1);
+	free(message);
+	longjmp(jumps[--depth], code);
+}
+
+void throw_with_data(int code, char* message, void* data){
+	if (depth < 1){
+		char* exc_type = code_to_string(code);
+		if (!exc_type){
+			fprintf(stderr, "Custom Exception Code: %d - %s\n", code, message);
+			exit(-1);
+		}
+		fprintf(stderr, "%s - %s\n", exc_type, message);
+		exit(-1);
+	}
+	e.code = code;
+	e.message = malloc(strlen(message) + 1);
+	e.data = data;
+	memcpy(e.message, message, strlen(message) + 1);
+	longjmp(jumps[--depth], code);
+}
+
+void throw_with_data_and_free(int code, char* message, void* data){
+	if (depth < 1){
+		char* exc_type = code_to_string(code);
+		if (!exc_type){
+			fprintf(stderr, "Custom Exception Code: %d - %s\n", code, message);
+			exit(-1);
+		}
+		fprintf(stderr, "%s - %s\n", exc_type, message);
+		exit(-1);
+	}
+	e.code = code;
+	e.message = malloc(strlen(message) + 1);
+	e.data = data;
 	memcpy(e.message, message, strlen(message) + 1);
 	free(message);
 	longjmp(jumps[--depth], code);
