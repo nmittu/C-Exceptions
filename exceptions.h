@@ -21,27 +21,16 @@ typedef struct{
 } exception;
 
 void init_exception_handling();
-
 exception* try(int code);
-
 void throw(int code, char* message);
-
 void throw_existing(exception* ex);
-
 void throw_and_free(int code, char* message);
-
 void throw_with_data(int code, char* message, void* data);
-
 void throw_with_data_and_free(int code, char* message, void* data);
-
 void catch();
-
 void end_try();
-
 void deinit_exception_handling();
-
 void destroy_exception(exception* e);
-
 char* code_to_string(int code);
 
 #endif
